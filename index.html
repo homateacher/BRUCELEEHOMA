@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>호마맨 명언 공부</title>
+    <title>호마맨 진리 공부</title>
     <style>
       :root {
         --card-grad-a: #fffdfa;
@@ -61,7 +61,7 @@
     </style>
   </head>
   <body>
-    <h1>🌟 호마맨 명언 공부 🌟</h1>
+    <h1>🌿 호마맨 진리 공부</h1>
 
     <div class="toolbar">
       <button id="shuffle">🔀 셔플</button>
@@ -71,7 +71,7 @@
 
     <div class="scene" id="scene" title="카드를 클릭해 뒤집기">
       <div class="card" id="card">
-        <div class="card__face" id="front">오늘의 명언 공부 ✨</div>
+        <div class="card__face" id="front">오늘의 진리 공부 ✨</div>
         <div class="card__face" id="back" style="transform: rotateY(180deg)"></div>
       </div>
     </div>
@@ -84,9 +84,9 @@
 
     <script>
       async function loadData(){
-        const res = await fetch('truth_quotes_300.json', { cache: 'no-store' });
-        if(!res.ok){ alert('명언 데이터를 불러오지 못했습니다. truth_quotes_300.json을 확인해주세요.'); return; }
-        const idioms = await res.json();
+        const res = await fetch('bible_truth_300.json', { cache: 'no-store' });
+        if(!res.ok){ alert('데이터를 불러오지 못했습니다. bible_truth_300.json을 확인해주세요.'); return; }
+        const verses = await res.json();
 
         const card  = document.getElementById('card');
         const front = document.getElementById('front');
@@ -120,14 +120,14 @@
         }
 
         function renderFront(){
-          const cur = idioms[idx];
+          const cur = verses[idx];
           front.innerHTML = `<div>${cur.term}</div>`;
-          meta.textContent = `${idx+1}/${idioms.length}`;
+          meta.textContent = `${idx+1}/${verses.length} — ${cur.origin}`;
         }
         function renderBack(){
-          const cur = idioms[idx];
-          back.innerHTML = `<div>${cur.meaning}</div><div class="origin">${cur.origin || ''}</div>`;
-          meta.textContent = `${idx+1}/${idioms.length}`;
+          const cur = verses[idx];
+          back.innerHTML = `<div>${cur.meaning}</div><div class="origin">${cur.origin}</div>`;
+          meta.textContent = `${idx+1}/${verses.length} — ${cur.origin}`;
         }
 
         function updateCard(){
@@ -139,8 +139,10 @@
           playSound();
         }
 
-        renderFront(); renderBack(); meta.textContent = `1/${idioms.length}`;
+        // 초기 렌더
+        renderFront(); renderBack();
 
+        // 인터랙션
         document.getElementById('flip').onclick = () => {
           card.classList.toggle('is-flipped');
           updateCard();
@@ -151,19 +153,20 @@
         };
 
         document.getElementById('next').onclick = () => {
-          idx = (idx + 1) % idioms.length;
+          idx = (idx + 1) % verses.length;
           updateCard();
         };
         document.getElementById('prev').onclick = () => {
-          idx = (idx - 1 + idioms.length) % idioms.length;
+          idx = (idx - 1 + verses.length) % verses.length;
           updateCard();
         };
         document.getElementById('shuffle').onclick = () => {
-          randShuffle(idioms);
+          randShuffle(verses);
           idx = 0;
           updateCard();
         };
 
+        // 키보드 네비게이션
         window.addEventListener('keydown', (e) => {
           if(e.key === 'ArrowRight') { document.getElementById('next').click(); }
           if(e.key === 'ArrowLeft')  { document.getElementById('prev').click(); }
