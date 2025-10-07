@@ -2,128 +2,43 @@
 <html lang="ko">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>호마맨 진리의 명언 200+</title>
     <style>
+      :root {
+        --card-grad-a: #fffdfa;
+        --card-grad-b: #fff7ea;
+        --card-grad-c: #fff3de;
+        --ink: #2b2b2b;
+        --ink-mute: #6b675d;
+        --border: #d8cbb2;
+      }
+      * { box-sizing: border-box; }
       body {
         font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        color: var(--ink);
         background: #f8f6f1;
-        margin: 0;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        margin: 0; padding: 20px;
+        display: flex; flex-direction: column; align-items: center; gap: 12px;
       }
-      h1 { font-size: 28px; font-weight: 800; margin-bottom: 16px; }
-      input, button { border-radius: 10px; border: 1px solid #7c735f; padding: 10px 14px; background: #fefcf7; }
-      .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; justify-content: center; }
-      .scene { width: 90%; max-width: 640px; height: 320px; perspective: 1000px; cursor: pointer; }
-      .card { width: 100%; height: 100%; position: relative; transition: transform 0.8s ease-in-out; transform-style: preserve-3d; border-radius: 22px; box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.05); border: 1px solid #d8cbb2; }
+      h1 { font-size: 28px; font-weight: 800; margin: 6px 0 10px; text-align:center; }
+      .toolbar {
+        display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center;
+      }
+      .toolbar button, .toolbar label {
+        border-radius: 10px; border: 1px solid var(--border);
+        padding: 8px 12px; background: #fefcf7; font-size: 14px;
+      }
+      .scene { width: 92vw; max-width: 640px; height: 340px; perspective: 1000px; cursor: pointer; }
+      .card {
+        width: 100%; height: 100%; position: relative;
+        transition: transform 0.8s ease-in-out;
+        transform-style: preserve-3d;
+        border-radius: 22px;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.05);
+        border: 1px solid var(--border);
+      }
       .is-flipped { transform: rotateY(180deg); }
       .card__face {
-        position: absolute; inset: 0; backface-visibility: hidden; border-radius: 22px;
-        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 26px;
-        background: linear-gradient(145deg, #fffdfa 0%, #fff7ea 50%, #fff3de 100%);
-        font-size: 22px; line-height: 1.4;
-      }
-      .card__face--back { transform: rotateY(180deg); }
-      .navs { display: flex; justify-content: space-between; width: 200px; margin: 10px 0; }
-      .muted { opacity: .6; font-size: 14px; }
-    </style>
-  </head>
-  <body>
-    <h1>🌟 호마맨 진리의 명언 200+</h1>
-    <div class="toolbar">
-      <input id="search" placeholder="검색(명언/인물/출처)" />
-      <button id="shuffle">🔀 셔플</button>
-      <button id="flip">↩️ 뒤집기</button>
-      <label><input type="checkbox" id="soundToggle" checked /> 사운드</label>
-    </div>
-
-    <div class="scene" id="scene">
-      <div class="card" id="card">
-        <div class="card__face card__face--front" id="front">오늘의 명언 공부 ✨</div>
-        <div class="card__face card__face--back" id="back"></div>
-      </div>
-    </div>
-
-    <div class="navs">
-      <button id="prev">◀</button>
-      <button id="next">▶</button>
-    </div>
-    <div id="meta" class="muted"></div>
-
-    <script>
-      async function loadData() {
-        const res = await fetch('quotes200.json');
-        const idioms = await res.json();
-
-        const card = document.getElementById('card');
-        const front = document.getElementById('front');
-        const back = document.getElementById('back');
-        const meta = document.getElementById('meta');
-        const soundToggle = document.getElementById('soundToggle');
-
-        let idx = 0;
-
-        function showCard() {
-          const cur = idioms[idx];
-          front.innerHTML = `<div style='font-size:22px;font-weight:700;'>${cur.term}</div>`;
-          back.innerHTML = `<div style='font-size:18px;line-height:1.4;'>${cur.meaning}</div><div style='margin-top:10px;font-size:14px;opacity:0.7;'>${cur.origin}</div>`;
-          meta.innerText = `${idx + 1}/${idioms.length}`;
-        }
-
-        function flipCard() {
-          card.classList.toggle('is-flipped');
-          playSound();
-        }
-
-        function playSound() {
-          if (!soundToggle.checked) return;
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          const now = ctx.currentTime;
-          osc.type = 'triangle';
-          osc.frequency.setValueAtTime(300, now);
-          osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
-          gain.gain.setValueAtTime(0.2, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-          osc.connect(gain).connect(ctx.destination);
-          osc.start(now);
-          osc.stop(now + 0.15);
-        }
-
-        // ✅ 이전/다음 버튼 기능 추가
-        document.getElementById('next').onclick = () => {
-          if (idx < idioms.length - 1) {
-            idx++;
-          } else {
-            idx = 0;
-          }
-          card.classList.remove('is-flipped');
-          showCard();
-          playSound();
-        };
-
-        document.getElementById('prev').onclick = () => {
-          if (idx > 0) {
-            idx--;
-          } else {
-            idx = idioms.length - 1;
-          }
-          card.classList.remove('is-flipped');
-          showCard();
-          playSound();
-        };
-
-        document.getElementById('flip').onclick = flipCard;
-        card.addEventListener('click', flipCard);
-
-        showCard();
-      }
-
-      loadData();
-    </script>
-  </body>
-</html>
+        position: absolute; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
