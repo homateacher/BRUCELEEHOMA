@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>호마맨 이소룡 명언</title>
+    <style>
+      body {
+        font-family: Pretendard, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #faf7ef;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      h1 { font-size: 32px; font-weight: 800; margin-bottom: 12px; }
+      input, button { border-radius: 10px; border: 1px solid #6b6658; padding: 10px 14px; background: #fcfaf3; }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; justify-content: center; }
+      .scene { width: 90%; max-width: 640px; height: 320px; perspective: 1000px; }
+      .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s; transform-style: preserve-3d; border-radius: 22px; box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.05); border: 1px solid #d9cdb7; }
+      .card.is-flipped { transform: rotateY(180deg); }
+      .card__face {
+        position: absolute; inset: 0; backface-visibility: hidden; border-radius: 22px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 26px;
+        background: linear-gradient(145deg, #fffdf9 0%, #fff8ec 50%, #fef2dc 100%);
+        background-image: radial-gradient(rgba(0,0,0,0.02) 0.7px, rgba(0,0,0,0) 0.7px), linear-gradient(10deg, rgba(120,90,60,0.03), rgba(120,90,60,0.01) 40%, rgba(120,90,60,0.04) 80%);
+        background-size: 10px 10px, 100% 100%; background-blend-mode: multiply;
+      }
+      .card__face--back { transform: rotateY(180deg); }
+      .navs { display: flex; justify-content: space-between; width: 200px; margin: 10px 0; }
+      .muted { opacity: .6; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>🐉 호마맨 이소룡 명언</h1>
+    <div class="toolbar">
+      <input id="search" placeholder="검색(명언/키워드/원문)" />
+      <button id="shuffle">🔀 셔플</button>
+      <button id="flip">↩️ 뒤집기</button>
+      <label><input type="checkbox" id="soundToggle" checked /> 사운드</label>
+    </div>
+
+    <div class="scene" id="scene">
+      <div class="card" id="card">
+        <div class="card__face card__face--front" id="front"></div>
+        <div class="card__face card__face--back" id="back"></div>
+      </div>
+    </div>
+
+    <div class="navs">
+      <button id="prev">◀</button>
+      <button id="next">▶</button>
+    </div>
+    <div id="meta" class="muted"></div>
+
+    <script>
+      // 150개 사자성어 데이터 (학문, 인생, 덕목, 교훈, 처세 등 고르게 구성)
+      const idioms = [
+  { term: "물을 닮아라. 형체를 버려라.", meaning: "Be water, my friend.", origin: "Jeet Kune Do / 철학·유연함" },
+  { term: "아는 것만으론 부족하다. 적용해야 한다.", meaning: "Knowing is not enough, we must apply.", origin: "실천·행동" },
+  { term: "의지만으로는 부족하다. 해야 한다.", meaning: "Willing is not enough, we must do.", origin: "실천·행동" },
+  { term: "한 가지 발차기를 만 번 연습한 사람을 두려워한다.", meaning: "I fear not the man who has practiced 10,000 kicks once, but one kick 10,000 times.", origin: "집중·기초" },
+  { term: "유용한 것은 흡수하고, 쓸모없는 것은 버려라. 그리고 너만의 것을 더하라.", meaning: "Absorb what is useful, discard what is not, add what is uniquely your own.", origin: "학습·창조" },
+  { term: "단순함이 영감의 열쇠다.", meaning: "Simplicity is the key to brilliance.", origin: "단순함" },
+  { term: "너무 오래 생각하면 아무것도 하지 못한다.", meaning: "If you spend too much time thinking about a thing, you'll never get it done.", origin: "실행" },
+  { term: "패배는 마음의 상태일 뿐이다.", meaning: "Defeat is a state of mind.", origin: "회복탄력성" },
+  { term: "쉽기만 한 삶을 기도하지 말라. 어려움을 견딜 힘을 구하라.", meaning: "Do not pray for an easy life; pray for the strength to endure a difficult one.", origin: "용기" },
+  { term: "시간을 사랑하라. 인생은 시간으로 이루어져 있다.", meaning: "If you love life, don't waste time; time is what life is made of.", origin: "시간·집중" },
+  { term: "상황 탓하지 마라. 기회를 창조하라.", meaning: "To hell with circumstances; I create opportunities.", origin: "주도성" },
+  { term: "사물을 과하게 중시할수록, 자신을 덜 중시하게 된다.", meaning: "The more we value things, the less we value ourselves.", origin: "가치·자존" },
+  { term: "진정한 삶은 남을 위해 사는 것이다.", meaning: "Real living is living for others.", origin: "이타심" },
+  { term: "생각하는 대로 네가 된다.", meaning: "As you think, so shall you become.", origin: "마음·형성" },
+  { term: "남의 기대에 맞추려고 태어난 게 아니다.", meaning: "I'm not in this world to live up to your expectations.", origin: "자기주도" },
+  { term: "불멸의 비결은 기억될 삶을 사는 것이다.", meaning: "The key to immortality is first living a life worth remembering.", origin: "유산" },
+  { term: "실수는 용서될 수 있다. 인정할 용기가 있다면.", meaning: "Mistakes are always forgivable, if one has the courage to admit them.", origin: "용기·성찰" },
+  { term: "방법이 없음을 방법으로, 한계를 한계 없음으로 삼아라.", meaning: "Using no way as way, having no limitation as limitation.", origin: "제약탈피" },
+  { term: "결과를 미리 정해두지 마라. 물처럼 대응하라.", meaning: "Do not anticipate – be like water.", origin: "유연성" },
+  { term: "컵을 비워야 채울 수 있다.", meaning: "Empty your cup so that it may be filled.", origin: "배움의 태도" },
+  { term: "스스로를 알아차려라. 반복하는 로봇이 되지 말라.", meaning: "Be self-aware, rather than a repetitious robot.", origin: "자각" },
+  { term: "목표는 항상 도달하라고 있는 게 아니다. 방향을 주기 위해 있다.", meaning: "A goal is not always meant to be reached; it often serves simply as something to aim at.", origin: "목표·방향" },
+  { term: "지식은 오래되면 먼지가 된다. 살아 있는 것은 실천이다.", meaning: "Knowledge earns you nothing without action.", origin: "실천" },
+  { term: "배움은 경험으로 살아난다.", meaning: "Learning is a constant process of discovery – a process without end.", origin: "학습" },
+  { term: "진정한 자유는 자기 표현에 있다.", meaning: "True freedom is self-expression.", origin: "자유" },
+  { term: "피하지 말고 흘러가라.", meaning: "Flow with whatever may happen.", origin: "유연성" },
+  { term: "훈련은 ‘왜’에서 시작한다.", meaning: "Training starts with why.", origin: "수련" },
+  { term: "두려움은 이해로 줄어든다.", meaning: "Fear decreases with understanding.", origin: "두려움" },
+  { term: "스스로를 제한하지 마라. 오늘의 한계가 내일의 장애가 된다.", meaning: "Don't set limitations; today's limits become tomorrow's obstacles.", origin: "성장" },
+  { term: "집중은 평범한 사람을 전사로 만든다.", meaning: "The successful warrior is the average man, with laser-like focus.", origin: "집중" },
+  { term: "빠르기보다 정확함을.", meaning: "Not speed but accuracy.", origin: "기술·집중" },
+  { term: "자연스러움이 최고의 기술이다.", meaning: "Naturalness is the highest form of art.", origin: "자연스러움" },
+  { term: "마음을 비우면 모든 것이 가능해진다.", meaning: "When the mind is empty, it is capable of anything.", origin: "마음" },
+  { term: "긴장을 풀면 더 강해진다.", meaning: "Relaxation is the key to power.", origin: "수련" },
+  { term: "지금 이 순간이 전부다.", meaning: "The moment is all there is.", origin: "현재" },
+  { term: "몸을 단련하듯 마음도 단련하라.", meaning: "As you train the body, discipline the mind.", origin: "수양" },
+  { term: "작은 습관이 큰 운명을 만든다.", meaning: "Small daily improvements lead to stunning results.", origin: "습관" },
+  { term: "표현하되, 과시하지 마라.", meaning: "Express, never impress.", origin: "겸손" },
+  { term: "움직임은 생각보다 앞선다.", meaning: "Action precedes thought in training.", origin: "행동" },
+  { term: "스스로의 길을 걸어라.", meaning: "Walk on.", origin: "독자성" }
+];
+
+      const search = document.getElementById('search');
+      const card = document.getElementById('card');
+      const front = document.getElementById('front');
+      const back = document.getElementById('back');
+      const meta = document.getElementById('meta');
+      const soundToggle = document.getElementById('soundToggle');
+
+      let allIdx = [...Array(idioms.length).keys()];
+      let order = shuffle([...allIdx]);
+      let idx = 0;
+      let backShown = false;
+
+      function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+      function applyFilter(){
+        const q = (search.value||'').trim().toLowerCase();
+        const filtered = allIdx.filter(i => `${idioms[i].term} ${idioms[i].meaning} ${idioms[i].origin}`.toLowerCase().includes(q));
+        order = shuffle([...filtered]); idx = 0; backShown = false; card.classList.remove('is-flipped'); showCard();
+      }
+
+      function showCard(){
+        if(order.length === 0){ front.innerHTML = `<div style='font-size:18px'>검색 결과가 없습니다.</div>`; back.innerHTML = `<div class='muted'>다른 키워드를 입력해 보세요.</div>`; meta.innerText = `0 / ${idioms.length}`; return; }
+        const cur=idioms[order[idx]];
+        front.innerHTML=`<div style='font-size:44px;font-weight:800;'>${cur.term}</div><div style='margin-top:12px;font-size:16px;opacity:0.6;'>카드를 클릭하거나 뒤집기 버튼을 눌러 원문·메모 보기</div>`;
+        back.innerHTML=`<div style='font-size:22px;font-weight:700;'>${cur.meaning}</div><div style='margin-top:10px;font-size:15px;opacity:0.7;'>출처/주제: ${cur.origin}</div>`;
+        meta.innerText=`카드 ${idx+1}/${order.length} · 전체 ${idioms.length}`;
+      }
+
+      function flipCard(){ card.classList.toggle('is-flipped'); playSound(); backShown=!backShown; }
+      function next(){ if(order.length===0) return; backShown=false; card.classList.remove('is-flipped'); idx=(idx+1)%order.length; showCard(); }
+      function prev(){ if(order.length===0) return; backShown=false; card.classList.remove('is-flipped'); idx=(idx-1+order.length)%order.length; showCard(); }
+      function reshuffle(){ if(order.length===0) return; order = shuffle(order); idx=0; backShown=false; card.classList.remove('is-flipped'); showCard(); }
+
+      function playSound(){ if(!soundToggle.checked) return; const ctx=new (window.AudioContext||window.webkitAudioContext)(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); const now=ctx.currentTime; osc.type='triangle'; osc.frequency.setValueAtTime(300,now); osc.frequency.exponentialRampToValueAtTime(800,now+0.15); gain.gain.setValueAtTime(0.2,now); gain.gain.exponentialRampToValueAtTime(0.001,now+0.15); osc.connect(gain).connect(ctx.destination); osc.start(now); osc.stop(now+0.15); }
+
+      document.getElementById('flip').onclick=flipCard;
+      document.getElementById('next').onclick=next;
+      document.getElementById('prev').onclick=prev;
+      document.getElementById('shuffle').onclick=reshuffle;
+      card.onclick=flipCard;
+      search.addEventListener('input', applyFilter);
+
+      showCard();
+    </script>
+  </body>
+</html>
