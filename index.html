@@ -52,56 +52,54 @@
       <button id="next">▶</button>
     </div>
     <div id="meta" class="muted"></div>
+  <script>
+  // 외부 JSON에서 데이터 불러오기
+  async function loadData(){
+    const res = await fetch('quotes200.json');
+    const idioms = await res.json();
 
-    <script>
-      // 200개 이상 명언 데이터 복원
-      const RAW = `오늘의 명언 공부 ✨|사람을 미워하지 마라 그 사람을 조종하는 사탄을 미워하라.|호마맨
-오늘의 명언 공부 ✨|불가능은 노력하지 않는 사람의 핑계다.|마이클 조던
-오늘의 명언 공부 ✨|나는 실패하지 않았다. 작동하지 않는 방법을 1만 가지 찾았을 뿐이다.|토머스 에디슨
-오늘의 명언 공부 ✨|한 가지 발차기를 만 번 연습한 자를 두려워한다.|이소룡
-오늘의 명언 공부 ✨|믿는 자에게는 능치 못함이 없느니라.|예수님 (누가복음 1:37)
-... (중략, 200개 전체 동일 데이터 삽입) ...`;
+    const card = document.getElementById('card');
+    const front = document.getElementById('front');
+    const back = document.getElementById('back');
+    const meta = document.getElementById('meta');
+    const soundToggle = document.getElementById('soundToggle');
 
-      const idioms = RAW.trim().split('\n').map(line => { const [term, meaning, origin] = line.split('|'); return { term, meaning, origin }; });
+    let idx = 0;
 
-      const card = document.getElementById('card');
-      const front = document.getElementById('front');
-      const back = document.getElementById('back');
-      const meta = document.getElementById('meta');
-      const soundToggle = document.getElementById('soundToggle');
-      let idx = 0;
+    function showCard(){
+      const cur=idioms[idx];
+      front.innerHTML=`<div style='font-size:22px;font-weight:700;'>${cur.term}</div>`;
+      back.innerHTML=`<div style='font-size:18px;line-height:1.4;'>${cur.meaning}</div><div style='margin-top:10px;font-size:14px;opacity:0.7;'>${cur.origin}</div>`;
+      meta.innerText=`${idx+1}/${idioms.length}`;
+    }
 
-      function showCard(){
-        const cur=idioms[idx];
-        front.innerHTML=`<div style='font-size:22px;font-weight:700;'>${cur.term}</div>`;
-        back.innerHTML=`<div style='font-size:18px;line-height:1.4;'>${cur.meaning}</div><div style='margin-top:10px;font-size:14px;opacity:0.7;'>${cur.origin}</div>`;
-        meta.innerText=`${idx+1}/${idioms.length}`;
-      }
+    function flipCard(){
+      card.classList.toggle('is-flipped');
+      playSound();
+    }
+    function playSound(){
+      if(!soundToggle.checked) return;
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      const now=ctx.currentTime;
+      osc.type='triangle';
+      osc.frequency.setValueAtTime(300,now);
+      osc.frequency.exponentialRampToValueAtTime(800,now+0.15);
+      gain.gain.setValueAtTime(0.2,now);
+      gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now+0.15);
+    }
 
-      function flipCard(){
-        card.classList.toggle('is-flipped');
-        playSound();
-      }
+    document.getElementById('flip').onclick=flipCard;
+    document.getElementById('card').addEventListener('click', flipCard);
 
-      function playSound(){
-        if(!soundToggle.checked) return;
-        const ctx=new (window.AudioContext||window.webkitAudioContext)();
-        const osc=ctx.createOscillator();
-        const gain=ctx.createGain();
-        const now=ctx.currentTime;
-        osc.type='triangle';
-        osc.frequency.setValueAtTime(300,now);
-        osc.frequency.exponentialRampToValueAtTime(800,now+0.15);
-        gain.gain.setValueAtTime(0.2,now);
-        gain.gain.exponentialRampToValueAtTime(0.001,now+0.15);
-        osc.connect(gain).connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now+0.15);
-      }
-
-      document.getElementById('flip').onclick=flipCard;
-      card.addEventListener('click', flipCard);
-      showCard();
-    </script>
+    showCard();
+  }
+  loadData();
+</script>
   </body>
 </html>
+
